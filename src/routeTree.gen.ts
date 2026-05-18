@@ -9,9 +9,15 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as CohortRouteImport } from './routes/cohort'
 import { Route as AssessmentRouteImport } from './routes/assessment'
 import { Route as IndexRouteImport } from './routes/index'
 
+const CohortRoute = CohortRouteImport.update({
+  id: '/cohort',
+  path: '/cohort',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AssessmentRoute = AssessmentRouteImport.update({
   id: '/assessment',
   path: '/assessment',
@@ -26,31 +32,42 @@ const IndexRoute = IndexRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/assessment': typeof AssessmentRoute
+  '/cohort': typeof CohortRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/assessment': typeof AssessmentRoute
+  '/cohort': typeof CohortRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/assessment': typeof AssessmentRoute
+  '/cohort': typeof CohortRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/assessment'
+  fullPaths: '/' | '/assessment' | '/cohort'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/assessment'
-  id: '__root__' | '/' | '/assessment'
+  to: '/' | '/assessment' | '/cohort'
+  id: '__root__' | '/' | '/assessment' | '/cohort'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AssessmentRoute: typeof AssessmentRoute
+  CohortRoute: typeof CohortRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/cohort': {
+      id: '/cohort'
+      path: '/cohort'
+      fullPath: '/cohort'
+      preLoaderRoute: typeof CohortRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/assessment': {
       id: '/assessment'
       path: '/assessment'
@@ -71,6 +88,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AssessmentRoute: AssessmentRoute,
+  CohortRoute: CohortRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
