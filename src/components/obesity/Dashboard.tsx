@@ -8,6 +8,7 @@ import {
   AreaChart, Area, XAxis, YAxis, Tooltip,
 } from "recharts";
 import { Button } from "@/components/ui/button";
+import { Link } from "@tanstack/react-router";
 import { Card } from "@/components/ui/card";
 import { Slider } from "@/components/ui/slider";
 import { Badge } from "@/components/ui/badge";
@@ -79,8 +80,12 @@ export function Dashboard() {
             and behavioural signals into one actionable risk score.
           </p>
           <div className="mt-6 flex flex-wrap gap-3">
-            <Button size="lg" className="font-semibold">Run new assessment <ChevronRight className="ml-1 h-4 w-4" /></Button>
-            <Button size="lg" variant="outline">View patient cohort</Button>
+            <Button asChild size="lg" className="font-semibold">
+              <Link to="/assessment">Run new assessment <ChevronRight className="ml-1 h-4 w-4" /></Link>
+            </Button>
+            <Button asChild size="lg" variant="outline">
+              <Link to="/cohort">View patient cohort</Link>
+            </Button>
           </div>
         </div>
       </header>
@@ -189,17 +194,19 @@ export function Dashboard() {
           <h2 className="text-xl font-semibold mb-4">Central data repository</h2>
           <div className="grid gap-4 md:grid-cols-3 lg:grid-cols-5">
             {[
-              { i: <Dna />, t: "Genetic", s: "DNA + stem cell" },
-              { i: <Activity />, t: "Wearables", s: "HR, steps, SpO₂" },
-              { i: <Apple />, t: "Food log", s: "Macros & micros" },
-              { i: <Brain />, t: "Epigenetic", s: "Methylation" },
-              { i: <ShieldCheck />, t: "EHR", s: "Labs & history" },
+              { id: "genetic", i: <Dna />, t: "Genetic", s: "DNA + stem cell" },
+              { id: "wearables", i: <Activity />, t: "Wearables", s: "HR, steps, SpO₂" },
+              { id: "food", i: <Apple />, t: "Food log", s: "Macros & micros" },
+              { id: "epigenetic", i: <Brain />, t: "Epigenetic", s: "Methylation" },
+              { id: "ehr", i: <ShieldCheck />, t: "EHR", s: "Labs & history" },
             ].map((s) => (
-              <Card key={s.t} className="bg-card border-border p-4 hover:border-primary/50 transition-colors">
-                <div className="h-9 w-9 rounded-lg bg-primary/15 text-primary grid place-items-center">{s.i}</div>
-                <div className="mt-3 font-semibold">{s.t}</div>
-                <div className="text-xs text-muted-foreground">{s.s}</div>
-              </Card>
+              <Link key={s.id} to="/sources/$id" params={{ id: s.id }} className="block">
+                <Card className="bg-card border-border p-4 hover:border-primary/50 transition-colors h-full">
+                  <div className="h-9 w-9 rounded-lg bg-primary/15 text-primary grid place-items-center">{s.i}</div>
+                  <div className="mt-3 font-semibold">{s.t}</div>
+                  <div className="text-xs text-muted-foreground">{s.s}</div>
+                </Card>
+              </Link>
             ))}
           </div>
         </section>
@@ -246,7 +253,9 @@ export function Dashboard() {
                 </li>
               ))}
             </ol>
-            <Button className="mt-6 w-full" size="lg">Activate plan</Button>
+            <Button asChild className="mt-6 w-full" size="lg">
+              <Link to="/plan">Activate plan</Link>
+            </Button>
           </Card>
         </section>
 
