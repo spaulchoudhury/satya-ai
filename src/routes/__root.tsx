@@ -72,14 +72,18 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Lovable App" },
-      { name: "description", content: "Lovable Generated Project" },
+      { title: "Satya - Become Intelligent today, Healthier Tomorrow" },
+      { name: "description", content: "Obesity is complex, Satya makes it clear. The AI-powered obesity intelligence companion that knows you beyond numbers - so you can take control & live better." },
       { name: "author", content: "Lovable" },
-      { property: "og:title", content: "Lovable App" },
-      { property: "og:description", content: "Lovable Generated Project" },
+      { property: "og:title", content: "Satya - Become Intelligent today, Healthier Tomorrow" },
+      { property: "og:description", content: "Obesity is complex, Satya makes it clear. The AI-powered obesity intelligence companion that knows you beyond numbers - so you can take control & live better." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "twitter:site", content: "@Lovable" },
+      { name: "twitter:title", content: "Satya - Become Intelligent today, Healthier Tomorrow" },
+      { name: "twitter:description", content: "Obesity is complex, Satya makes it clear. The AI-powered obesity intelligence companion that knows you beyond numbers - so you can take control & live better." },
+      { property: "og:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/b9fbhnY4N4SuJ85PoquI87c7ywx1/social-images/social-1779090208545-image_2026-05-18_131328462.webp" },
+      { name: "twitter:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/b9fbhnY4N4SuJ85PoquI87c7ywx1/social-images/social-1779090208545-image_2026-05-18_131328462.webp" },
     ],
     links: [
       {
