@@ -13,6 +13,7 @@ import { Route as PlanRouteImport } from './routes/plan'
 import { Route as CohortRouteImport } from './routes/cohort'
 import { Route as AssessmentRouteImport } from './routes/assessment'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as SourcesIdRouteImport } from './routes/sources.$id'
 
 const PlanRoute = PlanRouteImport.update({
   id: '/plan',
@@ -34,18 +35,25 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SourcesIdRoute = SourcesIdRouteImport.update({
+  id: '/sources/$id',
+  path: '/sources/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/assessment': typeof AssessmentRoute
   '/cohort': typeof CohortRoute
   '/plan': typeof PlanRoute
+  '/sources/$id': typeof SourcesIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/assessment': typeof AssessmentRoute
   '/cohort': typeof CohortRoute
   '/plan': typeof PlanRoute
+  '/sources/$id': typeof SourcesIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -53,13 +61,14 @@ export interface FileRoutesById {
   '/assessment': typeof AssessmentRoute
   '/cohort': typeof CohortRoute
   '/plan': typeof PlanRoute
+  '/sources/$id': typeof SourcesIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/assessment' | '/cohort' | '/plan'
+  fullPaths: '/' | '/assessment' | '/cohort' | '/plan' | '/sources/$id'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/assessment' | '/cohort' | '/plan'
-  id: '__root__' | '/' | '/assessment' | '/cohort' | '/plan'
+  to: '/' | '/assessment' | '/cohort' | '/plan' | '/sources/$id'
+  id: '__root__' | '/' | '/assessment' | '/cohort' | '/plan' | '/sources/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -67,6 +76,7 @@ export interface RootRouteChildren {
   AssessmentRoute: typeof AssessmentRoute
   CohortRoute: typeof CohortRoute
   PlanRoute: typeof PlanRoute
+  SourcesIdRoute: typeof SourcesIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -99,6 +109,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/sources/$id': {
+      id: '/sources/$id'
+      path: '/sources/$id'
+      fullPath: '/sources/$id'
+      preLoaderRoute: typeof SourcesIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -107,6 +124,7 @@ const rootRouteChildren: RootRouteChildren = {
   AssessmentRoute: AssessmentRoute,
   CohortRoute: CohortRoute,
   PlanRoute: PlanRoute,
+  SourcesIdRoute: SourcesIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
