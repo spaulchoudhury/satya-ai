@@ -87,6 +87,9 @@ export function Dashboard() {
             <Button asChild size="lg" variant="outline">
               <Link to="/cohort">View patient cohort</Link>
             </Button>
+            <Button asChild size="lg" variant="secondary">
+              <Link to="/chat"><MessageSquare className="mr-2 h-4 w-4" /> Ask Satya AI</Link>
+            </Button>
           </div>
         </div>
       </header>
