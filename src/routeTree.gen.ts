@@ -11,9 +11,11 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as PlanRouteImport } from './routes/plan'
 import { Route as CohortRouteImport } from './routes/cohort'
+import { Route as ChatRouteImport } from './routes/chat'
 import { Route as AssessmentRouteImport } from './routes/assessment'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as SourcesIdRouteImport } from './routes/sources.$id'
+import { Route as ApiChatRouteImport } from './routes/api/chat'
 
 const PlanRoute = PlanRouteImport.update({
   id: '/plan',
@@ -23,6 +25,11 @@ const PlanRoute = PlanRouteImport.update({
 const CohortRoute = CohortRouteImport.update({
   id: '/cohort',
   path: '/cohort',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ChatRoute = ChatRouteImport.update({
+  id: '/chat',
+  path: '/chat',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AssessmentRoute = AssessmentRouteImport.update({
@@ -40,42 +47,77 @@ const SourcesIdRoute = SourcesIdRouteImport.update({
   path: '/sources/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiChatRoute = ApiChatRouteImport.update({
+  id: '/api/chat',
+  path: '/api/chat',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/assessment': typeof AssessmentRoute
+  '/chat': typeof ChatRoute
   '/cohort': typeof CohortRoute
   '/plan': typeof PlanRoute
+  '/api/chat': typeof ApiChatRoute
   '/sources/$id': typeof SourcesIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/assessment': typeof AssessmentRoute
+  '/chat': typeof ChatRoute
   '/cohort': typeof CohortRoute
   '/plan': typeof PlanRoute
+  '/api/chat': typeof ApiChatRoute
   '/sources/$id': typeof SourcesIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/assessment': typeof AssessmentRoute
+  '/chat': typeof ChatRoute
   '/cohort': typeof CohortRoute
   '/plan': typeof PlanRoute
+  '/api/chat': typeof ApiChatRoute
   '/sources/$id': typeof SourcesIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/assessment' | '/cohort' | '/plan' | '/sources/$id'
+  fullPaths:
+    | '/'
+    | '/assessment'
+    | '/chat'
+    | '/cohort'
+    | '/plan'
+    | '/api/chat'
+    | '/sources/$id'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/assessment' | '/cohort' | '/plan' | '/sources/$id'
-  id: '__root__' | '/' | '/assessment' | '/cohort' | '/plan' | '/sources/$id'
+  to:
+    | '/'
+    | '/assessment'
+    | '/chat'
+    | '/cohort'
+    | '/plan'
+    | '/api/chat'
+    | '/sources/$id'
+  id:
+    | '__root__'
+    | '/'
+    | '/assessment'
+    | '/chat'
+    | '/cohort'
+    | '/plan'
+    | '/api/chat'
+    | '/sources/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AssessmentRoute: typeof AssessmentRoute
+  ChatRoute: typeof ChatRoute
   CohortRoute: typeof CohortRoute
   PlanRoute: typeof PlanRoute
+  ApiChatRoute: typeof ApiChatRoute
   SourcesIdRoute: typeof SourcesIdRoute
 }
 
@@ -93,6 +135,13 @@ declare module '@tanstack/react-router' {
       path: '/cohort'
       fullPath: '/cohort'
       preLoaderRoute: typeof CohortRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/chat': {
+      id: '/chat'
+      path: '/chat'
+      fullPath: '/chat'
+      preLoaderRoute: typeof ChatRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/assessment': {
@@ -116,14 +165,23 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SourcesIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/chat': {
+      id: '/api/chat'
+      path: '/api/chat'
+      fullPath: '/api/chat'
+      preLoaderRoute: typeof ApiChatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AssessmentRoute: AssessmentRoute,
+  ChatRoute: ChatRoute,
   CohortRoute: CohortRoute,
   PlanRoute: PlanRoute,
+  ApiChatRoute: ApiChatRoute,
   SourcesIdRoute: SourcesIdRoute,
 }
 export const routeTree = rootRouteImport
