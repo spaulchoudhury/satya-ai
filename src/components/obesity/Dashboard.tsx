@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import {
   Activity, Apple, Brain, Dna, Heart, Moon, Scale, Sparkles, Droplet,
   Footprints, Flame, ShieldCheck, AlertTriangle, TrendingDown, ChevronRight,
+  MessageSquare,
 } from "lucide-react";
 import {
   Radar, RadarChart, PolarGrid, PolarAngleAxis, ResponsiveContainer,
