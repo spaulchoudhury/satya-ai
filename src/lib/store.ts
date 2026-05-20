@@ -24,9 +24,12 @@ function write<T>(key: string, value: T) {
 }
 
 export function useStored<T>(key: string, fallback: T) {
-  const [value, setValue] = useState<T>(() => read(key, fallback));
+  // Always start with fallback to keep SSR and first client render identical.
+  // Hydrate from localStorage in an effect to avoid hydration mismatches.
+  const [value, setValue] = useState<T>(fallback);
 
   useEffect(() => {
+    setValue(read(key, fallback));
     const l = () => setValue(read(key, fallback));
     let set = listeners.get(key);
     if (!set) {

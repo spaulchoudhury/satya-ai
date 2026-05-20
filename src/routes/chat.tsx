@@ -31,7 +31,8 @@ export const Route = createFileRoute("/chat")({
 
 const chatTransport = new DefaultChatTransport({ api: "/api/chat" });
 
-function uiToText(m: UIMessage) {
+function uiToText(m: UIMessage | undefined | null) {
+  if (!m || !Array.isArray(m.parts)) return "";
   return m.parts.map((p) => (p.type === "text" ? p.text : "")).join("");
 }
 
@@ -306,9 +307,7 @@ function ChatPage() {
 
           {messages.map((message) => {
             const isUser = message.role === "user";
-            const text = message.parts
-              .map((part) => (part.type === "text" ? part.text : ""))
-              .join("");
+            const text = uiToText(message);
 
             return (
               <div
