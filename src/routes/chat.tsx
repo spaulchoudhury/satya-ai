@@ -78,7 +78,13 @@ function ChatPage() {
     if (!active) return;
     if (hydratedRef.current === active.id) return;
     hydratedRef.current = active.id;
-    setMessages(active.messages as UIMessage[]);
+    setMessages(
+      active.messages.map((m) => ({
+        id: m.id,
+        role: m.role,
+        parts: [{ type: "text", text: m.text }],
+      })) as UIMessage[],
+    );
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [active?.id]);
 
