@@ -1,11 +1,14 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
-import { ArrowLeft, Dna, Activity, Apple, Brain, ShieldCheck } from "lucide-react";
+import { ArrowLeft, Dna, Activity, Apple, Brain, ShieldCheck, Lock } from "lucide-react";
 import type { ReactNode } from "react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { AppGuard } from "@/components/obesity/AppGuard";
+import { useAuth } from "@/lib/auth";
+import { maskSignal } from "@/lib/privacy";
 
 export const Route = createFileRoute("/sources/$id")({
-  component: SourcePage,
+  component: SourceRoute,
   head: ({ params }) => ({
     meta: [
       { title: `${(SOURCES[params.id]?.title) ?? "Data source"} — Satya` },
@@ -13,6 +16,14 @@ export const Route = createFileRoute("/sources/$id")({
     ],
   }),
 });
+
+function SourceRoute() {
+  return (
+    <AppGuard require="view:sources">
+      <SourcePage />
+    </AppGuard>
+  );
+}
 
 type Source = {
   title: string;
@@ -86,6 +97,8 @@ const SOURCES: Record<string, Source> = {
 };
 
 function SourcePage() {
+  const { user } = useAuth();
+  const role = user?.role ?? null;
   const { id } = Route.useParams();
   const src = SOURCES[id];
   if (!src) throw notFound();
@@ -108,11 +121,16 @@ function SourcePage() {
         <p className="mt-6 text-muted-foreground max-w-2xl">{src.summary}</p>
 
         <h2 className="mt-10 text-xl font-semibold">Latest signals</h2>
+        {role !== "clinician" && (
+          <p className="mt-2 text-xs text-muted-foreground inline-flex items-center gap-1">
+            <Lock className="h-3 w-3" /> Some clinical values are restricted to clinicians.
+          </p>
+        )}
         <Card className="mt-4 bg-card border-border divide-y divide-border">
           {src.signals.map((s) => (
             <div key={s.k} className="flex items-center justify-between px-5 py-4">
               <span className="text-sm text-muted-foreground">{s.k}</span>
-              <span className="font-semibold tabular-nums">{s.v}</span>
+              <span className="font-semibold tabular-nums">{maskSignal(s.v, role)}</span>
             </div>
           ))}
         </Card>

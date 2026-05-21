@@ -13,9 +13,10 @@ import {
   useStored,
   type StoredPatient,
 } from "@/lib/store";
+import { AppGuard } from "@/components/obesity/AppGuard";
 
 export const Route = createFileRoute("/assessment")({
-  component: AssessmentPage,
+  component: AssessmentRoute,
   head: () => ({
     meta: [
       { title: "New Assessment — Satya" },
@@ -23,6 +24,14 @@ export const Route = createFileRoute("/assessment")({
     ],
   }),
 });
+
+function AssessmentRoute() {
+  return (
+    <AppGuard require="write:assessment">
+      <AssessmentPage />
+    </AppGuard>
+  );
+}
 
 const STEPS = ["Identity", "Biometrics", "Lifestyle", "Review"] as const;
 

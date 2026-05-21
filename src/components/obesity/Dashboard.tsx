@@ -15,6 +15,9 @@ import { Slider } from "@/components/ui/slider";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import hero from "@/assets/hero-health.jpg";
+import { AppGuard } from "./AppGuard";
+import { can, useAuth } from "@/lib/auth";
+import { REDACT } from "@/lib/privacy";
 
 type Inputs = {
   age: number; bmi: number; sleep: number; activity: number;
@@ -48,10 +51,25 @@ const trend = Array.from({ length: 12 }, (_, m) => ({
 }));
 
 export function Dashboard() {
+  return (
+    <AppGuard require="view:dashboard">
+      <DashboardBody />
+    </AppGuard>
+  );
+}
+
+function DashboardBody() {
+  const { user } = useAuth();
+  const role = user?.role ?? null;
   const [i, setI] = useState<Inputs>(DEFAULT);
   const risk = useMemo(() => computeRisk(i), [i]);
   const tier = risk.total > 70 ? "Critical" : risk.total > 45 ? "Elevated" : "Healthy";
   const tierColor = risk.total > 70 ? "text-destructive" : risk.total > 45 ? "text-accent" : "text-primary";
+
+  // Researchers see only aggregates — hide personal risk number.
+  const isResearcher = role === "researcher";
+  const displayTotal = isResearcher ? REDACT : String(risk.total);
+  const displayTier = isResearcher ? "Aggregate view" : tier;
 
   const radarData = [
     { axis: "Metabolic", v: risk.metabolic },
@@ -81,15 +99,26 @@ export function Dashboard() {
             and behavioural signals into one actionable risk score.
           </p>
           <div className="mt-6 flex flex-wrap gap-3">
-            <Button asChild size="lg" className="font-semibold">
-              <Link to="/assessment">Run new assessment <ChevronRight className="ml-1 h-4 w-4" /></Link>
-            </Button>
-            <Button asChild size="lg" variant="outline">
-              <Link to="/cohort">View patient cohort</Link>
-            </Button>
-            <Button asChild size="lg" variant="secondary">
-              <Link to="/chat"><MessageSquare className="mr-2 h-4 w-4" /> Ask Satya AI</Link>
-            </Button>
+            {can(role, "write:assessment") && (
+              <Button asChild size="lg" className="font-semibold">
+                <Link to="/assessment">Run new assessment <ChevronRight className="ml-1 h-4 w-4" /></Link>
+              </Button>
+            )}
+            {can(role, "view:cohort") && (
+              <Button asChild size="lg" variant="outline">
+                <Link to="/cohort">View patient cohort</Link>
+              </Button>
+            )}
+            {can(role, "view:chat") && (
+              <Button asChild size="lg" variant="secondary">
+                <Link to="/chat"><MessageSquare className="mr-2 h-4 w-4" /> Ask Satya AI</Link>
+              </Button>
+            )}
+            {can(role, "view:plan") && (
+              <Button asChild size="lg" variant="ghost">
+                <Link to="/plan">My prevention plan</Link>
+              </Button>
+            )}
           </div>
         </div>
       </header>
@@ -103,13 +132,18 @@ export function Dashboard() {
               <div>
                 <p className="text-xs uppercase tracking-widest text-muted-foreground">Composite obesity risk</p>
                 <div className="mt-2 flex items-end gap-4">
-                  <span className="text-7xl md:text-8xl font-bold tabular-nums">{risk.total}</span>
+                  <span className="text-7xl md:text-8xl font-bold tabular-nums">{displayTotal}</span>
                   <div className="pb-3">
-                    <div className={`text-lg font-semibold ${tierColor}`}>{tier}</div>
+                    <div className={`text-lg font-semibold ${tierColor}`}>{displayTier}</div>
                     <div className="text-xs text-muted-foreground">/ 100 risk index</div>
                   </div>
                 </div>
-                <Progress value={risk.total} className="mt-5 h-2 w-full max-w-md" />
+                <Progress value={isResearcher ? 0 : risk.total} className="mt-5 h-2 w-full max-w-md" />
+                {isResearcher && (
+                  <p className="mt-3 text-xs text-muted-foreground max-w-md">
+                    Individual risk values are redacted for research access. Use the cohort view for de-identified aggregates.
+                  </p>
+                )}
               </div>
               <div className="grid grid-cols-2 gap-3 min-w-[260px]">
                 <MiniStat icon={<Heart className="h-4 w-4" />} label="Cardio" val={risk.cardio} />

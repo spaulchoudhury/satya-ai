@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as PlanRouteImport } from './routes/plan'
+import { Route as LoginRouteImport } from './routes/login'
 import { Route as CohortRouteImport } from './routes/cohort'
 import { Route as ChatRouteImport } from './routes/chat'
 import { Route as AssessmentRouteImport } from './routes/assessment'
@@ -20,6 +21,11 @@ import { Route as ApiChatRouteImport } from './routes/api/chat'
 const PlanRoute = PlanRouteImport.update({
   id: '/plan',
   path: '/plan',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CohortRoute = CohortRouteImport.update({
@@ -58,6 +64,7 @@ export interface FileRoutesByFullPath {
   '/assessment': typeof AssessmentRoute
   '/chat': typeof ChatRoute
   '/cohort': typeof CohortRoute
+  '/login': typeof LoginRoute
   '/plan': typeof PlanRoute
   '/api/chat': typeof ApiChatRoute
   '/sources/$id': typeof SourcesIdRoute
@@ -67,6 +74,7 @@ export interface FileRoutesByTo {
   '/assessment': typeof AssessmentRoute
   '/chat': typeof ChatRoute
   '/cohort': typeof CohortRoute
+  '/login': typeof LoginRoute
   '/plan': typeof PlanRoute
   '/api/chat': typeof ApiChatRoute
   '/sources/$id': typeof SourcesIdRoute
@@ -77,6 +85,7 @@ export interface FileRoutesById {
   '/assessment': typeof AssessmentRoute
   '/chat': typeof ChatRoute
   '/cohort': typeof CohortRoute
+  '/login': typeof LoginRoute
   '/plan': typeof PlanRoute
   '/api/chat': typeof ApiChatRoute
   '/sources/$id': typeof SourcesIdRoute
@@ -88,6 +97,7 @@ export interface FileRouteTypes {
     | '/assessment'
     | '/chat'
     | '/cohort'
+    | '/login'
     | '/plan'
     | '/api/chat'
     | '/sources/$id'
@@ -97,6 +107,7 @@ export interface FileRouteTypes {
     | '/assessment'
     | '/chat'
     | '/cohort'
+    | '/login'
     | '/plan'
     | '/api/chat'
     | '/sources/$id'
@@ -106,6 +117,7 @@ export interface FileRouteTypes {
     | '/assessment'
     | '/chat'
     | '/cohort'
+    | '/login'
     | '/plan'
     | '/api/chat'
     | '/sources/$id'
@@ -116,6 +128,7 @@ export interface RootRouteChildren {
   AssessmentRoute: typeof AssessmentRoute
   ChatRoute: typeof ChatRoute
   CohortRoute: typeof CohortRoute
+  LoginRoute: typeof LoginRoute
   PlanRoute: typeof PlanRoute
   ApiChatRoute: typeof ApiChatRoute
   SourcesIdRoute: typeof SourcesIdRoute
@@ -128,6 +141,13 @@ declare module '@tanstack/react-router' {
       path: '/plan'
       fullPath: '/plan'
       preLoaderRoute: typeof PlanRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/cohort': {
@@ -180,6 +200,7 @@ const rootRouteChildren: RootRouteChildren = {
   AssessmentRoute: AssessmentRoute,
   ChatRoute: ChatRoute,
   CohortRoute: CohortRoute,
+  LoginRoute: LoginRoute,
   PlanRoute: PlanRoute,
   ApiChatRoute: ApiChatRoute,
   SourcesIdRoute: SourcesIdRoute,
@@ -187,13 +208,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

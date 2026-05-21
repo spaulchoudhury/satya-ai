@@ -1,13 +1,16 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import { ArrowLeft, Search, Sparkles } from "lucide-react";
+import { ArrowLeft, Search, Sparkles, ShieldCheck } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { PATIENTS_KEY, useStored, type StoredPatient } from "@/lib/store";
+import { AppGuard } from "@/components/obesity/AppGuard";
+import { useAuth, ROLE_LABEL } from "@/lib/auth";
+import { viewPatient } from "@/lib/privacy";
 
 export const Route = createFileRoute("/cohort")({
-  component: CohortPage,
+  component: CohortRoute,
   head: () => ({
     meta: [
       { title: "Patient Cohort — Satya" },
@@ -26,18 +29,42 @@ const SEED: Array<Omit<StoredPatient, "createdAt">> = [
   { id: "P-1048", name: "Noor Al-Fahad", age: 25, bmi: 21.8, risk: 19, tier: "Healthy" },
 ];
 
+function CohortRoute() {
+  return (
+    <AppGuard require="view:cohort">
+      <CohortPage />
+    </AppGuard>
+  );
+}
+
 function CohortPage() {
+  const { user } = useAuth();
+  const role = user?.role ?? null;
   const [stored] = useStored<StoredPatient[]>(PATIENTS_KEY, []);
   const [query, setQuery] = useState("");
 
   const rows = useMemo(() => {
     const all = [...stored, ...SEED.map((s) => ({ ...s, createdAt: 0 }))];
+    const sorted = all.sort((a, b) => b.risk - a.risk);
+    const views = sorted.map((p) => ({ raw: p, view: viewPatient(p, role) }));
     const q = query.trim().toLowerCase();
-    const filtered = q
-      ? all.filter((p) => p.name.toLowerCase().includes(q) || p.id.toLowerCase().includes(q))
-      : all;
-    return filtered.sort((a, b) => b.risk - a.risk);
-  }, [stored, query]);
+    if (!q) return views;
+    // Researchers can only search by anonymised pseudo-ID
+    if (role === "researcher") {
+      return views.filter(({ view }) => view.id.toLowerCase().includes(q));
+    }
+    return views.filter(({ raw, view }) =>
+      raw.name.toLowerCase().includes(q) ||
+      raw.id.toLowerCase().includes(q) ||
+      view.id.toLowerCase().includes(q),
+    );
+  }, [stored, query, role]);
+
+  const isResearcher = role === "researcher";
+  const tierCounts = rows.reduce<Record<string, number>>((m, r) => {
+    m[r.view.tier] = (m[r.view.tier] ?? 0) + 1;
+    return m;
+  }, {});
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -52,9 +79,31 @@ function CohortPage() {
           {stored.length > 0 && <span className="ml-2 text-primary">· {stored.length} newly assessed</span>}
         </p>
 
+        <div className="mt-3 inline-flex items-center gap-2 text-xs text-muted-foreground bg-card border border-border rounded-md px-3 py-1.5">
+          <ShieldCheck className="h-3 w-3 text-primary" />
+          Viewing as <span className="text-foreground font-medium">{user ? ROLE_LABEL[user.role] : "—"}</span>
+          {role === "nurse" && <span>· names → initials, ages → bands</span>}
+          {role === "researcher" && <span>· de-identified · pseudo-IDs only</span>}
+          {role === "clinician" && <span>· full PHI · audit-logged</span>}
+        </div>
+
+        {isResearcher && (
+          <div className="mt-6 grid grid-cols-3 gap-3 max-w-xl">
+            {(["Critical","Elevated","Healthy"] as const).map((t) => (
+              <Card key={t} className="bg-card border-border p-4">
+                <div className="text-xs text-muted-foreground">{t}</div>
+                <div className="mt-1 text-2xl font-bold tabular-nums">{tierCounts[t] ?? 0}</div>
+              </Card>
+            ))}
+          </div>
+        )}
+
         <div className="mt-6 relative max-w-md">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input placeholder="Search patient or ID" className="pl-9" value={query} onChange={(e) => setQuery(e.target.value)} />
+          <Input
+            placeholder={isResearcher ? "Search by pseudo-ID (e.g. ANON-…)" : "Search patient or ID"}
+            className="pl-9" value={query} onChange={(e) => setQuery(e.target.value)}
+          />
         </div>
 
         <Card className="mt-6 bg-card border-border overflow-hidden">
@@ -71,13 +120,13 @@ function CohortPage() {
               </tr>
             </thead>
             <tbody>
-              {rows.map((p) => (
-                <tr key={p.id} className="border-t border-border hover:bg-background/30 transition-colors">
+              {rows.map(({ raw, view: p }) => (
+                <tr key={raw.id} className="border-t border-border hover:bg-background/30 transition-colors">
                   <td className="px-5 py-4 font-mono text-xs text-muted-foreground">{p.id}</td>
                   <td className="px-5 py-4 font-medium">{p.name}</td>
-                  <td className="px-5 py-4">{p.age}</td>
-                  <td className="px-5 py-4 tabular-nums">{p.bmi}</td>
-                  <td className="px-5 py-4 font-bold tabular-nums">{p.risk}</td>
+                  <td className="px-5 py-4">{p.ageDisplay}</td>
+                  <td className="px-5 py-4 tabular-nums">{p.bmiDisplay}</td>
+                  <td className="px-5 py-4 font-bold tabular-nums">{p.riskDisplay}</td>
                   <td className="px-5 py-4">
                     <Badge variant="outline" className={
                       p.tier === "Critical" ? "border-destructive/50 text-destructive" :
@@ -97,6 +146,10 @@ function CohortPage() {
             </tbody>
           </table>
         </Card>
+        <p className="mt-3 text-[11px] text-muted-foreground">
+          Access to identifiable health information is governed by role-based access control.
+          All views are audit-logged for HIPAA / GDPR compliance.
+        </p>
       </div>
     </div>
   );
