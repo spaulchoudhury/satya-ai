@@ -14,9 +14,10 @@ import {
   extractSuggestionsFromText,
   type ChatSession, type PlanSuggestion,
 } from "@/lib/store";
+import { AppGuard } from "@/components/obesity/AppGuard";
 
 export const Route = createFileRoute("/chat")({
-  component: ChatPage,
+  component: ChatRoute,
   head: () => ({
     meta: [
       { title: "Satya AI — Ask about obesity & health" },
@@ -28,6 +29,14 @@ export const Route = createFileRoute("/chat")({
     ],
   }),
 });
+
+function ChatRoute() {
+  return (
+    <AppGuard require="view:chat">
+      <ChatPage />
+    </AppGuard>
+  );
+}
 
 const chatTransport = new DefaultChatTransport({ api: "/api/chat" });
 

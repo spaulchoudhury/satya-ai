@@ -5,9 +5,10 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { PLAN_KEY, useStored, type PlanSuggestion } from "@/lib/store";
 import { useMemo } from "react";
+import { AppGuard } from "@/components/obesity/AppGuard";
 
 export const Route = createFileRoute("/plan")({
-  component: PlanPage,
+  component: PlanRoute,
   head: () => ({
     meta: [
       { title: "Prevention Plan — Satya" },
@@ -15,6 +16,14 @@ export const Route = createFileRoute("/plan")({
     ],
   }),
 });
+
+function PlanRoute() {
+  return (
+    <AppGuard require="view:plan">
+      <PlanPage />
+    </AppGuard>
+  );
+}
 
 const PILLARS = [
   { key: "Nutrition", i: <Apple className="h-5 w-5" />, d: "1,950 kcal · 35g sugar cap · Mediterranean macros · 3 meals + 1 snack" },
