@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import {
   Activity, Apple, Brain, Dna, Heart, Moon, Scale, Sparkles, Droplet,
   Footprints, Flame, ShieldCheck, AlertTriangle, TrendingDown, ChevronRight,
-  MessageSquare,
+  MessageSquare, Compass,
 } from "lucide-react";
 import {
   Radar, RadarChart, PolarGrid, PolarAngleAxis, ResponsiveContainer,
@@ -117,6 +117,11 @@ function DashboardBody() {
             {can(role, "view:plan") && (
               <Button asChild size="lg" variant="ghost">
                 <Link to="/plan">My prevention plan</Link>
+              </Button>
+            )}
+            {can(role, "view:strategy") && (
+              <Button asChild size="lg" variant="ghost" className="text-primary">
+                <Link to="/strategy"><Compass className="mr-2 h-4 w-4" /> Strategy & PMF</Link>
               </Button>
             )}
           </div>
