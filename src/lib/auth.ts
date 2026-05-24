@@ -88,21 +88,22 @@ export type Capability =
   | "view:chat"
   | "view:sources"
   | "view:sources.full"
-  | "view:admin";
+  | "view:admin"
+  | "view:strategy";
 
 const CAPS: Record<Role, Capability[]> = {
-  patient: ["view:dashboard", "view:plan", "view:chat"],
+  patient: ["view:dashboard", "view:plan", "view:chat", "view:strategy"],
   nurse: [
     "view:dashboard", "view:cohort",
     "view:assessment", "write:assessment",
-    "view:plan", "view:sources", "view:chat",
+    "view:plan", "view:sources", "view:chat", "view:strategy",
   ],
   clinician: [
     "view:dashboard", "view:cohort", "view:cohort.full",
     "view:assessment", "write:assessment",
-    "view:plan", "view:sources", "view:sources.full", "view:chat",
+    "view:plan", "view:sources", "view:sources.full", "view:chat", "view:strategy",
   ],
-  researcher: ["view:dashboard", "view:cohort", "view:admin"],
+  researcher: ["view:dashboard", "view:cohort", "view:admin", "view:strategy"],
 };
 
 export function can(role: Role | null | undefined, cap: Capability): boolean {
