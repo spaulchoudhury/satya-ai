@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as StrategyRouteImport } from './routes/strategy'
 import { Route as PlanRouteImport } from './routes/plan'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as CohortRouteImport } from './routes/cohort'
@@ -18,6 +19,11 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as SourcesIdRouteImport } from './routes/sources.$id'
 import { Route as ApiChatRouteImport } from './routes/api/chat'
 
+const StrategyRoute = StrategyRouteImport.update({
+  id: '/strategy',
+  path: '/strategy',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PlanRoute = PlanRouteImport.update({
   id: '/plan',
   path: '/plan',
@@ -66,6 +72,7 @@ export interface FileRoutesByFullPath {
   '/cohort': typeof CohortRoute
   '/login': typeof LoginRoute
   '/plan': typeof PlanRoute
+  '/strategy': typeof StrategyRoute
   '/api/chat': typeof ApiChatRoute
   '/sources/$id': typeof SourcesIdRoute
 }
@@ -76,6 +83,7 @@ export interface FileRoutesByTo {
   '/cohort': typeof CohortRoute
   '/login': typeof LoginRoute
   '/plan': typeof PlanRoute
+  '/strategy': typeof StrategyRoute
   '/api/chat': typeof ApiChatRoute
   '/sources/$id': typeof SourcesIdRoute
 }
@@ -87,6 +95,7 @@ export interface FileRoutesById {
   '/cohort': typeof CohortRoute
   '/login': typeof LoginRoute
   '/plan': typeof PlanRoute
+  '/strategy': typeof StrategyRoute
   '/api/chat': typeof ApiChatRoute
   '/sources/$id': typeof SourcesIdRoute
 }
@@ -99,6 +108,7 @@ export interface FileRouteTypes {
     | '/cohort'
     | '/login'
     | '/plan'
+    | '/strategy'
     | '/api/chat'
     | '/sources/$id'
   fileRoutesByTo: FileRoutesByTo
@@ -109,6 +119,7 @@ export interface FileRouteTypes {
     | '/cohort'
     | '/login'
     | '/plan'
+    | '/strategy'
     | '/api/chat'
     | '/sources/$id'
   id:
@@ -119,6 +130,7 @@ export interface FileRouteTypes {
     | '/cohort'
     | '/login'
     | '/plan'
+    | '/strategy'
     | '/api/chat'
     | '/sources/$id'
   fileRoutesById: FileRoutesById
@@ -130,12 +142,20 @@ export interface RootRouteChildren {
   CohortRoute: typeof CohortRoute
   LoginRoute: typeof LoginRoute
   PlanRoute: typeof PlanRoute
+  StrategyRoute: typeof StrategyRoute
   ApiChatRoute: typeof ApiChatRoute
   SourcesIdRoute: typeof SourcesIdRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/strategy': {
+      id: '/strategy'
+      path: '/strategy'
+      fullPath: '/strategy'
+      preLoaderRoute: typeof StrategyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/plan': {
       id: '/plan'
       path: '/plan'
@@ -202,6 +222,7 @@ const rootRouteChildren: RootRouteChildren = {
   CohortRoute: CohortRoute,
   LoginRoute: LoginRoute,
   PlanRoute: PlanRoute,
+  StrategyRoute: StrategyRoute,
   ApiChatRoute: ApiChatRoute,
   SourcesIdRoute: SourcesIdRoute,
 }
