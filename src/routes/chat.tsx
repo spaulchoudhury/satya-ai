@@ -15,6 +15,7 @@ import {
   type ChatSession, type PlanSuggestion,
 } from "@/lib/store";
 import { AppGuard } from "@/components/obesity/AppGuard";
+import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/chat")({
   component: ChatRoute,
@@ -38,7 +39,20 @@ function ChatRoute() {
   );
 }
 
-const chatTransport = new DefaultChatTransport({ api: "/api/chat" });
+const chatTransport = new DefaultChatTransport({
+  api: "/api/chat",
+  fetch: async (input, init) => {
+    let { data } = await supabase.auth.getSession();
+    if (!data.session) {
+      await supabase.auth.signInAnonymously();
+      ({ data } = await supabase.auth.getSession());
+    }
+    const token = data.session?.access_token;
+    const headers = new Headers(init?.headers);
+    if (token) headers.set("Authorization", `Bearer ${token}`);
+    return fetch(input, { ...init, headers });
+  },
+});
 
 function uiToText(m: UIMessage | undefined | null) {
   if (!m || !Array.isArray(m.parts)) return "";
