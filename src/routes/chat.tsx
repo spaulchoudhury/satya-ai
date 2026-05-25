@@ -42,7 +42,11 @@ function ChatRoute() {
 const chatTransport = new DefaultChatTransport({
   api: "/api/chat",
   fetch: async (input, init) => {
-    const { data } = await supabase.auth.getSession();
+    let { data } = await supabase.auth.getSession();
+    if (!data.session) {
+      await supabase.auth.signInAnonymously();
+      ({ data } = await supabase.auth.getSession());
+    }
     const token = data.session?.access_token;
     const headers = new Headers(init?.headers);
     if (token) headers.set("Authorization", `Bearer ${token}`);
