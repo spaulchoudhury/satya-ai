@@ -8,6 +8,7 @@ type ChatRequestBody = { messages?: unknown };
 
 const MAX_MESSAGES = 50;
 const MAX_TEXT_LEN = 8000;
+const MAX_BODY_BYTES = 64 * 1024;
 
 function totalTextLength(messages: UIMessage[]): number {
   let total = 0;
@@ -25,6 +26,12 @@ export const Route = createFileRoute("/api/chat")({
   server: {
     handlers: {
       POST: async ({ request }: { request: Request }) => {
+        // Hard byte cap before parsing
+        const contentLength = Number(request.headers.get("content-length") ?? "0");
+        if (contentLength && contentLength > MAX_BODY_BYTES) {
+          return new Response("Payload too large", { status: 413 });
+        }
+
         // Authn: require a valid Supabase bearer token
         const authHeader = request.headers.get("authorization");
         if (!authHeader?.startsWith("Bearer ")) {
@@ -48,12 +55,33 @@ export const Route = createFileRoute("/api/chat")({
           return new Response("Unauthorized", { status: 401 });
         }
 
-        const { messages } = (await request.json()) as ChatRequestBody;
+        const rawBody = await request.text();
+        if (rawBody.length > MAX_BODY_BYTES) {
+          return new Response("Payload too large", { status: 413 });
+        }
+        let parsed: ChatRequestBody;
+        try {
+          parsed = JSON.parse(rawBody) as ChatRequestBody;
+        } catch {
+          return new Response("Invalid JSON", { status: 400 });
+        }
+        const { messages } = parsed;
         if (!Array.isArray(messages)) {
           return new Response("Messages are required", { status: 400 });
         }
         if (messages.length === 0 || messages.length > MAX_MESSAGES) {
           return new Response("Invalid message count", { status: 400 });
+        }
+        // Reject any non-text parts
+        for (const m of messages as UIMessage[]) {
+          if (!Array.isArray(m?.parts)) {
+            return new Response("Invalid message format", { status: 400 });
+          }
+          for (const p of m.parts) {
+            if (p?.type !== "text" || typeof (p as { text?: unknown }).text !== "string") {
+              return new Response("Only text message parts are allowed", { status: 400 });
+            }
+          }
         }
         if (totalTextLength(messages as UIMessage[]) > MAX_TEXT_LEN) {
           return new Response("Payload too large", { status: 413 });
