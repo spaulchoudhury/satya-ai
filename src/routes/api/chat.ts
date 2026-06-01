@@ -1,7 +1,6 @@
 import { createLovableAiGatewayProvider } from "@/lib/ai-gateway";
 import { convertToModelMessages, streamText, type UIMessage } from "ai";
 import { createFileRoute } from "@tanstack/react-router";
-import { createClient } from "@supabase/supabase-js";
 import "@tanstack/react-start";
 
 type ChatRequestBody = { messages?: unknown };
