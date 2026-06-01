@@ -10,6 +10,7 @@ import {
   DEMO_ACCOUNTS, ROLE_LABEL, ROLE_BLURB,
   loginAs, useAuth, type AuthUser,
 } from "@/lib/auth";
+import { supabase } from "@/integrations/supabase/client";
 
 type Search = { redirect?: string };
 
@@ -34,6 +35,7 @@ function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [err, setErr] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
 
   useEffect(() => {
     if (user) navigate({ to: (redirect as "/") ?? "/" });
@@ -44,14 +46,53 @@ function LoginPage() {
     navigate({ to: (redirect as "/") ?? "/" });
   };
 
-  const submit = (e: React.FormEvent) => {
+  const submit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const match = DEMO_ACCOUNTS.find(
-      (a) => a.email.toLowerCase() === email.trim().toLowerCase(),
-    );
-    if (!match) { setErr("No account found for that email."); return; }
-    if (password.length < 4) { setErr("Password must be at least 4 characters."); return; }
-    pickPersona(match);
+    setErr(null);
+    const trimmed = email.trim().toLowerCase();
+    if (password.length < 4) {
+      setErr("Password must be at least 4 characters.");
+      return;
+    }
+
+    // Demo personas (no real auth)
+    const demo = DEMO_ACCOUNTS.find((a) => a.email.toLowerCase() === trimmed);
+    if (demo) {
+      pickPersona(demo);
+      return;
+    }
+
+    // Real Supabase sign-in
+    setBusy(true);
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: trimmed,
+        password,
+      });
+      if (error || !data.user) {
+        setErr(error?.message ?? "Invalid email or password.");
+        return;
+      }
+      const u = data.user;
+      const name =
+        (u.user_metadata?.full_name as string | undefined) ??
+        (u.user_metadata?.name as string | undefined) ??
+        u.email?.split("@")[0] ??
+        "User";
+      const role = ((u.user_metadata?.role as string | undefined) ?? "patient") as
+        | "patient" | "clinician" | "nurse" | "researcher";
+      pickPersona({
+        id: u.id,
+        name,
+        email: u.email ?? trimmed,
+        role: ["patient", "clinician", "nurse", "researcher"].includes(role) ? role : "patient",
+        patientId: (u.user_metadata?.patient_id as string | undefined),
+      });
+    } catch (e) {
+      setErr(e instanceof Error ? e.message : "Sign-in failed.");
+    } finally {
+      setBusy(false);
+    }
   };
 
   return (
@@ -94,7 +135,9 @@ function LoginPage() {
               {err && (
                 <p className="text-xs text-destructive">{err}</p>
               )}
-              <Button type="submit" className="w-full" size="lg">Sign in</Button>
+              <Button type="submit" className="w-full" size="lg" disabled={busy}>
+                {busy ? "Signing in…" : "Sign in"}
+              </Button>
               <p className="text-[11px] text-muted-foreground">
                 Prototype only. No real credentials are stored or transmitted.
               </p>
