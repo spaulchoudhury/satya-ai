@@ -33,23 +33,7 @@ export const Route = createFileRoute("/api/chat")({
   server: {
     handlers: {
       POST: async ({ request }: { request: Request }) => {
-        // Auth: require Supabase Bearer token
-        const authHeader = request.headers.get("authorization") ?? "";
-        const token = authHeader.replace(/^Bearer\s+/i, "").trim();
-        if (!token) return new Response("Unauthorized", { status: 401 });
-
-        const supabaseUrl = process.env.SUPABASE_URL;
-        const supabaseAnon = process.env.SUPABASE_PUBLISHABLE_KEY;
-        if (!supabaseUrl || !supabaseAnon) {
-          return new Response("Server misconfigured", { status: 500 });
-        }
-        const sb = createClient(supabaseUrl, supabaseAnon);
-        const { data: userData, error: userErr } = await sb.auth.getUser(token);
-        if (userErr || !userData?.user) {
-          return new Response("Unauthorized", { status: 401 });
-        }
-
-        // Size cap
+        // Auth temporarily disabled for demo personas — re-enable before prod.
         const contentLength = Number(request.headers.get("content-length") ?? "0");
         if (contentLength && contentLength > MAX_BODY_BYTES) {
           return new Response("Payload too large", { status: 413 });
