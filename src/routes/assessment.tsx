@@ -14,6 +14,7 @@ import {
   type StoredPatient,
 } from "@/lib/store";
 import { AppGuard } from "@/components/obesity/AppGuard";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/assessment")({
   component: AssessmentRoute,
@@ -83,6 +84,9 @@ function AssessmentPage() {
       createdAt: Date.now(),
     };
     setPatients((prev) => [patient, ...prev]);
+    toast.success(`${patient.name} added to cohort`, {
+      description: `${patient.id} · BMI ${patient.bmi} · Risk ${patient.risk} (${patient.tier})`,
+    });
     navigate({ to: "/cohort" });
   };
 

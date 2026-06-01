@@ -18,6 +18,7 @@ import hero from "@/assets/hero-health.jpg";
 import { AppGuard } from "./AppGuard";
 import { can, useAuth } from "@/lib/auth";
 import { REDACT } from "@/lib/privacy";
+import { EhrUpload } from "./EhrUpload";
 
 type Inputs = {
   age: number; bmi: number; sleep: number; activity: number;
@@ -234,6 +235,11 @@ function DashboardBody() {
 
         {/* DATA SOURCES */}
         <section>
+          {can(role, "write:assessment") && (
+            <div className="mb-6">
+              <EhrUpload />
+            </div>
+          )}
           <h2 className="text-xl font-semibold mb-4">Central data repository</h2>
           <div className="grid gap-4 md:grid-cols-3 lg:grid-cols-5">
             {[
