@@ -45,7 +45,14 @@ function CohortPage() {
 
   const rows = useMemo(() => {
     const all = [...stored, ...SEED.map((s) => ({ ...s, createdAt: 0 }))];
-    const sorted = all.sort((a, b) => b.risk - a.risk);
+    // Newly added patients (createdAt > 0) float to the top, sorted by
+    // most-recent first. Seeded cohort below, sorted by composite risk.
+    const sorted = all.sort((a, b) => {
+      if (a.createdAt > 0 && b.createdAt === 0) return -1;
+      if (b.createdAt > 0 && a.createdAt === 0) return 1;
+      if (a.createdAt > 0 && b.createdAt > 0) return b.createdAt - a.createdAt;
+      return b.risk - a.risk;
+    });
     const views = sorted.map((p) => ({ raw: p, view: viewPatient(p, role) }));
     const q = query.trim().toLowerCase();
     if (!q) return views;
@@ -121,7 +128,7 @@ function CohortPage() {
             </thead>
             <tbody>
               {rows.map(({ raw, view: p }) => (
-                <tr key={raw.id} className="border-t border-border hover:bg-background/30 transition-colors">
+                <tr key={raw.id} className={`border-t border-border hover:bg-background/30 transition-colors ${p.createdAt > 0 ? "bg-primary/5" : ""}`}>
                   <td className="px-5 py-4 font-mono text-xs text-muted-foreground">{p.id}</td>
                   <td className="px-5 py-4 font-medium">{p.name}</td>
                   <td className="px-5 py-4">{p.ageDisplay}</td>
